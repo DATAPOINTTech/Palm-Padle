@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795822802972",
+    "project_id": "palm-village-project",
+    "storage_bucket": "palm-village-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795822802972:android:212532885b82390a1937d9",
+        "android_client_info": {
+          "package_name": "com.example.palm_padle_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_xlpDMfczGbQKDbj8jewrf3PBFa6WDYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

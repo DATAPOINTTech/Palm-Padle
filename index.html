@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Palm Village - Padel Booking</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js for Modern Reactive JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Tailwind Config for Custom Brand Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        // The Palm Village Theme Colors
+                        palmGreen: '#0f4c3a',
+                        palmGreenDark: '#0a3629',
+                        palmGold: '#d4af37',
+                        palmGoldLight: '#f3d56a',
+                        // Datapoint Technologies Theme Colors
+                        dpNavy: '#0B172A',
+                        dpBlue: '#0066FF',
+                        dpLightBlue: '#00A3FF'
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'glow': '0 0 20px rgba(212, 175, 55, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .fade-enter { opacity: 0; transform: translateY(10px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 0.4s ease-out; }
+
+        html { scroll-behavior: smooth; }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-150%); }
+        }
+        .animate-marquee {
+            animation: marquee 10s linear infinite;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-gray-800 font-sans" x-data="padelBookingApp()" x-init="initApp()">
+
+    <!-- ======================================= -->
+    <!-- HEADER & NAVIGATION LOGIC               -->
+    <!-- ======================================= -->
+    <header class="bg-white shadow-md border-b-4 border-palmGreen sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative">
+
+            <!-- Left: Logo & Branding -->
+            <div class="flex items-center space-x-3 cursor-pointer" @click="goHome()">
+                <img src="palm_logo.png" alt="The Palm Village Logo" class="h-14 md:h-16 w-auto object-contain drop-shadow-sm"
+                     onerror="this.outerHTML='<div class=\'h-14 w-14 rounded-full border-2 border-palmGold bg-palmGreen flex items-center justify-center text-palmGold font-heading font-bold text-xl shadow-lg\'>PV</div>'">
+                <!-- Center: Main heading -->
+            <div class="flex flex-col ml-3 border-l-2 border-palmGold pl-3 mt-1 md:mt-0">
+                <h1 class="font-heading font-black text-xl md:text-2xl text-palmGreen tracking-tight leading-none uppercase">PALM VILLAGE</h1>
+                <span class="font-heading font-bold text-lg md:text-xl text-palmGold tracking-widest leading-none mt-1 uppercase">PADEL CLUB</span>
+            </div>
+            </div>
+
+            <!-- Center: Desktop Menu -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <button @click="goHome()" class="text-gray-700 hover:text-palmGreen font-bold transition">Home</button>
+                <button @click="scrollToAbout()" class="text-gray-700 hover:text-palmGreen font-bold transition">About Us</button>
+                <button @click="openAdmin()" class="text-gray-700 hover:text-dpBlue font-bold transition flex items-center space-x-1">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <span>Admin Access</span>
+                </button>
+            </nav>
+
+            <!-- Right: App Downloads & CTA -->
+            <div class="hidden md:flex items-center space-x-6">
+
+                <!-- App Download Icons -->
+                <div class="flex items-center space-x-4 pr-6 border-r border-gray-200">
+                    <a href="#" class="text-gray-400 hover:text-gray-900 transition flex flex-col items-center group" title="Download iOS App">
+                        <span class="text-[8px] font-bold mb-1 tracking-widest uppercase text-gray-400 group-hover:text-blue-600 transition">Download</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.84 1.5.05 2.78.69 3.5 1.84-2.94 1.63-2.45 5.72.69 6.84-1.04 2.53-2.13 3.8-2.77 4.33zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.43 2.5-1.92 4.41-3.74 4.25z"/></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-green-600 transition flex flex-col items-center group" title="Download Android App">
+                        <span class="text-[8px] font-bold mb-1 tracking-widest uppercase text-gray-400 group-hover:text-green-600 transition">Download</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.4158.4158 0 0 0-.1521-.5676.4162.4162 0 0 0-.5676.1521l-2.022 3.503C15.5457 8.2435 13.8294 7.8228 12 7.8228s-3.5457.4207-5.1371 1.1275L4.841 5.447a.4155.4155 0 0 0-.5676-.1521.4152.4152 0 0 0-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1182-9.4396"/></svg>
+                    </a>
+                </div>
+
+                <!-- Book CTA -->
+                <button @click="currentView = 'booking'; mobileMenuOpen = false" class="bg-palmGreen hover:bg-palmGreenDark text-white px-6 py-2.5 rounded-full font-bold shadow-md transition transform hover:-translate-y-0.5 border border-palmGreen flex items-center space-x-2">
+                    <svg class="w-4 h-4 text-palmGold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="text-sm">Book Court</span>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <div class="md:hidden flex items-center space-x-4">
+                <div class="flex items-center space-x-3">
+                    <a href="#" class="text-gray-400"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.84 1.5.05 2.78.69 3.5 1.84-2.94 1.63-2.45 5.72.69 6.84-1.04 2.53-2.13 3.8-2.77 4.33zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.43 2.5-1.92 4.41-3.74 4.25z"/></svg></a>
+                    <a href="#" class="text-gray-400"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.4158.4158 0 0 0-.1521-.5676.4162.4162 0 0 0-.5676.1521l-2.022 3.503C15.5457 8.2435 13.8294 7.8228 12 7.8228s-3.5457.4207-5.1371 1.1275L4.841 5.447a.4155.4155 0 0 0-.5676-.1521.4152.4152 0 0 0-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1182-9.4396"/></svg></a>
+                </div>
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-800 focus:outline-none">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!mobileMenuOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="mobileMenuOpen" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div x-show="mobileMenuOpen" class="md:hidden absolute top-full left-0 w-full bg-white shadow-xl border-b border-gray-200" x-transition style="display: none;">
+            <div class="px-4 py-6 space-y-4 flex flex-col">
+                <button @click="goHome()" class="text-left font-bold text-lg text-gray-800 border-b border-gray-100 pb-2">Home</button>
+                <button @click="scrollToAbout()" class="text-left font-bold text-lg text-gray-800 border-b border-gray-100 pb-2">About Us</button>
+                <button @click="openAdmin(); mobileMenuOpen = false" class="text-left font-bold text-lg text-gray-800 border-b border-gray-100 pb-2 flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Admin Login</button>
+                <button @click="currentView = 'booking'; mobileMenuOpen = false" class="text-left font-bold text-lg text-palmGreen pb-2">Book Court</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ======================================= -->
+    <!-- MAIN CONTENT & ADVERTISEMENTS           -->
+    <!-- ======================================= -->
+    <div class="w-full flex justify-center max-w-[1400px] mx-auto relative gap-4">
+
+        <!-- MAIN APP CONTENT -->
+        <main class="flex-grow w-full max-w-6xl p-4 sm:p-6 lg:p-8 mb-12">
+
+        <!-- ======================= -->
+        <!-- VIEW 1: LANDING PAGE -->
+        <!-- ======================= -->
+        <div x-show="currentView === 'landing'"
+             x-transition
+             class="space-y-8 max-w-4xl mx-auto"
+             style="display: none;">
+
+            <!-- Top Info Row -->
+            <div class="w-full mb-8">
+                <!-- Advance Booking Alert Card (Full Width) -->
+                <div class="bg-gradient-to-r from-palmGreen to-palmGreenDark rounded-2xl shadow-md p-6 text-white flex flex-col sm:flex-row items-center justify-between border-l-4 border-palmGold">
+                    <div class="flex items-center mb-4 sm:mb-0">
+                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mr-4 shrink-0">
+                            <svg class="w-6 h-6 text-palmGold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-bold text-xl leading-tight">Advance Booking Available</h3>
+                            <p class="text-sm text-green-100 mt-1">Residents can book up to 7 days in advance. Guests up to 3 days.</p>
+                        </div>
+                    </div>
+                    <button @click="currentView = 'booking'" class="w-full sm:w-auto bg-palmGold hover:bg-yellow-500 text-palmGreenDark font-bold text-base px-8 py-3 rounded-lg shadow-sm transition transform hover:-translate-y-0.5 whitespace-nowrap">
+                        Book Future Date
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Dashboard Row -->
+            <div class="grid grid-cols-1 gap-8">
+
+                <!-- Available Slots Today (Free Slots Cards) -->
+                <div class="bg-white rounded-3xl shadow-soft border border-gray-100 p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-3xl -mr-10 -mt-10"></div>
+
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 relative z-10">
+                        <div class="mb-3 sm:mb-0">
+                            <h2 class="font-heading text-3xl font-extrabold text-palmGreen">Today's Free Slots</h2>
+                            <p class="text-gray-500 mt-1">Select an available time to book instantly</p>
+                        </div>
+                        <div class="text-sm font-bold text-palmGold bg-yellow-50 px-4 py-2 rounded-lg border border-yellow-100 shadow-sm" x-text="todayDateFormatted"></div>
+                    </div>
+
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-4 relative z-10">
+                        <template x-for="s in todaySlots" :key="s.time">
+                            <button @click="quickBook(s.time)"
+                                    :disabled="s.booked"
+                                    :class="s.booked ? 'bg-gray-50 border-gray-100 text-gray-400 opacity-70 cursor-not-allowed' : 'bg-white border-palmGreen/30 text-palmGreen hover:bg-palmGreen hover:text-white hover:shadow-md transform hover:-translate-y-1'"
+                                    class="py-4 rounded-2xl border-2 font-bold transition-all duration-200 flex flex-col items-center justify-center space-y-1">
+                                <span class="text-lg" x-text="s.time"></span>
+                                <span class="text-[10px] uppercase tracking-wider font-bold"
+                                      :class="s.booked ? 'text-gray-400' : 'text-palmGold'"
+                                      x-text="s.booked ? 'Booked' : 'Available'"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Removed Right Card -->
+            </div>
+
+            <!-- About Us Row -->
+            <div id="about-us-section" class="bg-white rounded-3xl shadow-soft border border-gray-100 p-8 lg:p-10 mb-8 mt-4">
+                <div class="inline-block bg-green-50 px-4 py-1.5 rounded-full text-palmGreen font-bold text-xs tracking-widest mb-4 w-max border border-green-100 uppercase">
+                  OUR STORY & PHILOSOPHY
+                </div>
+                <h3 class="font-heading text-3xl font-extrabold text-gray-900 mb-4 leading-tight">
+                  Redefining Sports & Premium Community Living
+                </h3>
+                <div class="space-y-4 text-gray-600 leading-relaxed text-sm sm:text-base">
+                  <p>
+                    Founded in 2015 in Hyderabad, Pakistan, <strong class="text-palmGreen font-semibold">The Palm Builders & Developers</strong> is synonymous with trust, vision, and uncompromising quality.
+                  </p>
+                  <p>
+                    Our brand philosophy is simple: <em class="text-palmGold font-semibold">"Trust is the true foundation of real estate."</em> We are committed to making top-tier living and sports facilities accessible, featuring world-class Padel courts, professional-grade turf, and automated digital check-in to elevate your sporting experience.
+                  </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-100">
+                  <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div class="text-palmGreen font-black text-xl mb-1">Court 1 & 2</div>
+                    <div class="text-xs text-gray-500 font-medium">Panoramic Tempered Glass & International Turf</div>
+                  </div>
+                  <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div class="text-palmGreen font-black text-xl mb-1">Smart Gate Pass</div>
+                    <div class="text-xs text-gray-500 font-medium">Instant WhatsApp QR Code & Court Verification</div>
+                  </div>
+                  <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div class="text-palmGreen font-black text-xl mb-1">Pro Rentals</div>
+                    <div class="text-xs text-gray-500 font-medium">Carbon Padel Rackets & Dunlop Pro Ball Cans</div>
+                  </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= -->
+        <!-- VIEW 2: BOOKING FORM -->
+        <!-- ======================= -->
+        <div x-show="currentView === 'booking'"
+             x-transition
+             class="max-w-4xl mx-auto bg-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden"
+             style="display: none;">
+
+            <!-- Booking Header -->
+            <div class="bg-gray-50 p-6 sm:px-10 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-heading text-3xl font-extrabold text-palmGreen">Court Reservation</h2>
+                    <p class="text-gray-500 mt-1">Complete your details to secure your slot</p>
+                </div>
+                <button @click="currentView = 'landing'" class="text-gray-600 hover:text-palmGreen bg-white border border-gray-300 shadow-sm font-semibold flex items-center space-x-2 px-5 py-2.5 rounded-xl transition duration-200 hover:shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Back</span>
+                </button>
+            </div>
+
+            <!-- Booking Form Content -->
+            <div class="p-6 sm:p-10 space-y-10">
+
+                <!-- STEP 1: Resident vs Outsider -->
+                <div>
+                    <h3 class="font-heading text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-palmGreen text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm mr-3 shadow-md">1</span>
+                        Select Package
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <button @click="setPackage('resident')"
+                                :class="type === 'resident' ? 'border-palmGreen bg-green-50/50 shadow-inner' : 'border-gray-200 bg-white hover:border-palmGreen hover:shadow-md'"
+                                class="relative p-6 rounded-2xl border-2 transition-all duration-300 text-left group overflow-hidden">
+                            <div class="font-heading font-bold text-xl text-gray-800 group-hover:text-palmGreen">Palm Resident</div>
+                            <div class="text-base text-gray-600 mt-1 font-medium">Rs. 1,200 / hr</div>
+                            <div class="text-xs text-palmGold font-bold mt-3 uppercase tracking-wider flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 7 Days Advance Booking</div>
+                            <div x-show="type === 'resident'" class="absolute top-6 right-6 text-palmGreen">
+                                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            </div>
+                        </button>
+
+                        <button @click="setPackage('outsider')"
+                                :class="type === 'outsider' ? 'border-palmGreen bg-green-50/50 shadow-inner' : 'border-gray-200 bg-white hover:border-palmGreen hover:shadow-md'"
+                                class="relative p-6 rounded-2xl border-2 transition-all duration-300 text-left group overflow-hidden">
+                            <div class="font-heading font-bold text-xl text-gray-800 group-hover:text-palmGreen">Guest / Outsider</div>
+                            <div class="text-base text-gray-600 mt-1 font-medium">Rs. 2,000 / hr</div>
+                            <div class="text-xs text-gray-500 font-bold mt-3 uppercase tracking-wider flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 3 Days Advance Booking</div>
+                            <div x-show="type === 'outsider'" class="absolute top-6 right-6 text-palmGreen">
+                                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div x-show="type === 'resident'" class="mt-5 bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Villa / Apartment Number <span class="text-red-500">*</span></label>
+                        <input type="text" x-model="verification" placeholder="e.g. Villa 42" class="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-palmGreen focus:border-palmGreen outline-none transition shadow-sm">
+                    </div>
+                </div>
+
+                <!-- STEP 2: Date & Slot -->
+                <div>
+                    <h3 class="font-heading text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-palmGreen text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm mr-3 shadow-md">2</span>
+                        Date & Time
+                    </h3>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Select Date</label>
+                        <input type="date" x-model="date" :min="minDate()" :max="maxDate()" @change="slot = ''" class="w-full md:w-1/2 p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-palmGreen focus:border-palmGreen outline-none transition shadow-sm font-medium text-gray-700">
+                    </div>
+
+                    <div x-show="date">
+                        <label class="block text-sm font-bold text-gray-700 mb-3">Available Slots (1-Hour)</label>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                            <template x-for="s in filteredSlots" :key="s.time">
+                                <button @click="if(!s.booked) slot = s.time"
+                                        :disabled="s.booked"
+                                        :class="s.booked ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60' : (slot === s.time ? 'bg-palmGreen text-white border-palmGreen shadow-md transform scale-105' : 'bg-white text-gray-700 border-gray-300 hover:border-palmGreen hover:text-palmGreen hover:shadow-sm')"
+                                        class="py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 border">
+                                    <span x-text="s.time"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Player Details & Addons -->
+                <div>
+                    <h3 class="font-heading text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-palmGreen text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm mr-3 shadow-md">3</span>
+                        Player Details & Add-ons
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Full Name <span class="text-red-500">*</span></label>
+                            <input type="text" x-model="name" placeholder="John Doe" class="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-palmGreen focus:border-palmGreen outline-none shadow-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">NIC Number <span class="text-red-500">*</span></label>
+                            <input type="text" x-model="nic" placeholder="xxxxx-xxxxxxx-x" class="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-palmGreen focus:border-palmGreen outline-none shadow-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">WhatsApp Number <span class="text-red-500">*</span></label>
+                            <input type="tel" x-model="phone" class="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-palmGreen focus:border-palmGreen outline-none shadow-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Number of Players</label>
+                            <select x-model="players" class="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-palmGreen focus:border-palmGreen outline-none shadow-sm transition">
+                                <option value="2">2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4">4 Players</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                        <h4 class="font-heading text-base font-bold text-gray-800 mb-4 flex items-center">
+                            Optional Equipment Rental
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                <div>
+                                    <div class="font-bold text-gray-800">Racket Rental</div>
+                                    <div class="text-sm text-gray-500 font-medium">Rs. 200 / racket</div>
+                                </div>
+                                <div class="flex items-center space-x-4 bg-gray-50 border border-gray-200 rounded-lg p-1">
+                                    <button @click="if(rackets > 0) rackets--" class="w-8 h-8 rounded-md bg-white text-gray-600 shadow-sm flex items-center justify-center font-bold hover:text-palmGreen">-</button>
+                                    <span class="w-4 text-center font-bold text-gray-800" x-text="rackets"></span>
+                                    <button @click="if(rackets < 4) rackets++" class="w-8 h-8 rounded-md bg-white text-gray-600 shadow-sm flex items-center justify-center font-bold hover:text-palmGreen">+</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                <div>
+                                    <div class="font-bold text-gray-800">Padel Balls</div>
+                                    <div class="text-sm text-gray-500 font-medium">Rs. 500 / can of 3</div>
+                                </div>
+                                <div class="flex items-center space-x-4 bg-gray-50 border border-gray-200 rounded-lg p-1">
+                                    <button @click="if(balls > 0) balls--" class="w-8 h-8 rounded-md bg-white text-gray-600 shadow-sm flex items-center justify-center font-bold hover:text-palmGreen">-</button>
+                                    <span class="w-4 text-center font-bold text-gray-800" x-text="balls"></span>
+                                    <button @click="if(balls < 5) balls++" class="w-8 h-8 rounded-md bg-white text-gray-600 shadow-sm flex items-center justify-center font-bold hover:text-palmGreen">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- STEP 4: Summary Checkout -->
+            <div class="bg-palmGreen p-6 sm:p-10 border-t border-palmGreenDark">
+                <div class="max-w-xl mx-auto">
+                    <h3 class="font-heading text-2xl font-bold mb-6 flex items-center text-palmGold justify-center">
+                        Booking Summary
+                    </h3>
+
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20 text-white">
+                        <div class="space-y-4 text-sm sm:text-base font-medium">
+                            <div class="flex justify-between items-center pb-3 border-b border-white/10">
+                                <span class="text-green-50">Court Fee (1 Hour)</span>
+                                <span class="font-bold text-lg">Rs. <span x-text="courtFee"></span></span>
+                            </div>
+                            <div class="flex justify-between items-center pb-3 border-b border-white/10" x-show="rackets > 0">
+                                <span class="text-green-50">Rackets (<span x-text="rackets"></span> × Rs. 200)</span>
+                                <span class="font-bold text-lg">Rs. <span x-text="rackets * 200"></span></span>
+                            </div>
+                            <div class="flex justify-between items-center pb-3 border-b border-white/10" x-show="balls > 0">
+                                <span class="text-green-50">Balls (<span x-text="balls"></span> × Rs. 500)</span>
+                                <span class="font-bold text-lg">Rs. <span x-text="balls * 500"></span></span>
+                            </div>
+                            <div class="pt-2 flex justify-between items-end">
+                                <span class="text-palmGold uppercase tracking-widest font-bold">Total Payable</span>
+                                <span class="font-heading text-4xl font-black text-white">Rs. <span x-text="totalAmount"></span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="confirmBooking()"
+                            class="w-full bg-palmGold hover:bg-yellow-500 text-palmGreenDark font-heading font-extrabold tracking-widest text-xl py-5 rounded-xl shadow-glow transition-all duration-300 transform hover:-translate-y-1">
+                        CONFIRM & PROCEED
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- ======================= -->
+        <!-- VIEW 3: ADMIN DASHBOARD -->
+        <!-- ======================= -->
+        <div x-show="currentView === 'admin'"
+             x-transition
+             class="max-w-6xl mx-auto bg-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden"
+             style="display: none;">
+
+            <div class="bg-dpNavy p-6 sm:px-10 border-b border-dpBlue flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-white">
+                <div>
+                    <h2 class="font-heading text-3xl font-extrabold text-white">Admin Dashboard</h2>
+                    <p class="text-blue-200 mt-1">Daily Booking & Income Report</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button @click="showPasswordModal = true" class="text-white hover:text-dpLightBlue bg-white/10 border border-white/20 shadow-sm font-semibold flex items-center space-x-2 px-4 py-2.5 rounded-xl transition duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4v-3.586l7.172-7.172A6 6 0 1115 9z"></path></svg>
+                        <span class="hidden sm:inline text-sm">Change Password</span>
+                    </button>
+                    <button @click="currentView = 'landing'; adminAuth = false" class="text-white hover:text-red-400 bg-white/10 border border-white/20 shadow-sm font-semibold flex items-center space-x-2 px-4 py-2.5 rounded-xl transition duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <span class="hidden sm:inline text-sm">Logout</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 sm:p-10 bg-gray-50">
+                <!-- Date Selector & Summary Cards -->
+                <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
+                    <div class="w-full md:w-auto">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Select Report Date</label>
+                        <input type="date" x-model="adminDate" @change="loadDailyReport()" class="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-dpBlue outline-none shadow-sm font-medium">
+                    </div>
+
+                    <div class="flex gap-4 w-full md:w-auto">
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex-1 min-w-[150px]">
+                            <div class="text-sm text-gray-500 font-bold mb-1">Total Bookings</div>
+                            <div class="text-3xl font-black text-dpNavy" x-text="dailyBookings.length">0</div>
+                        </div>
+                        <div class="bg-gradient-to-r from-palmGreen to-palmGreenDark p-5 rounded-2xl shadow-sm flex-1 min-w-[150px] text-white">
+                            <div class="text-sm text-green-100 font-bold mb-1">Daily Income</div>
+                            <div class="text-3xl font-black">Rs. <span x-text="dailyIncome"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bookings Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider font-bold border-b border-gray-200">
+                                <th class="p-4">Ref #</th>
+                                <th class="p-4">Slot</th>
+                                <th class="p-4">Customer</th>
+                                <th class="p-4">Phone / NIC</th>
+                                <th class="p-4">Amount</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Action</th>
+
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-gray-100">
+                            <tr x-show="dailyBookings.length === 0">
+                                <td colspan="7" class="p-8 text-center text-gray-500 font-medium">No bookings found for this date.</td>
+                            </tr>
+                            <template x-for="b in dailyBookings" :key="b.docId">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="p-4 font-bold text-dpNavy" x-text="b.bookingReference"></td>
+                                    <td class="p-4 font-semibold text-palmGreen" x-text="b.timeSlot"></td>
+                                    <td class="p-4">
+                                        <div class="font-bold text-gray-800" x-text="b.customerName"></div>
+                                        <div class="text-xs text-gray-500" x-text="b.packageType === 'resident' ? 'Resident' : 'Outsider'"></div>
+                                    </td>
+                                    <td class="p-4">
+                                        <div x-text="b.whatsappNumber"></div>
+                                        <div class="text-xs text-gray-400" x-text="b.userId"></div>
+                                    </td>
+                                    <td class="p-4 font-bold text-gray-800">Rs. <span x-text="b.financials.totalPaid"></span></td>
+                                    <td class="p-4">
+                                        <span class="px-3 py-1 rounded-full text-xs font-bold"
+                                              :class="b.status === 'utilized' ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'"
+                                              x-text="b.status === 'utilized' ? 'Utilized' : 'Confirmed'">
+                                        </span>
+                                    </td>
+                                    <td class="p-4">
+                                        <button x-show="b.status !== 'utilized'" @click="markUtilized(b.docId)" class="text-xs bg-palmGold text-palmGreenDark font-bold px-3 py-1.5 rounded-lg hover:bg-yellow-500 transition shadow-sm">
+                                            Mark Utilized
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </main>
+
+        <!-- RIGHT ADVERTISEMENT STICKERS (DATAPOINT) -->
+        <aside class="hidden xl:flex flex-col w-[240px] pt-8 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar shrink-0 space-y-4">
+
+            <!-- Marquee Alert Sticker -->
+            <div class="bg-dpNavy border border-dpBlue rounded-xl overflow-hidden shadow-lg shadow-dpBlue/20 flex items-center h-8 relative shrink-0">
+                <div class="absolute left-0 bg-dpBlue z-10 px-2 h-full flex items-center text-[9px] font-bold text-white tracking-widest shadow-md">LATEST</div>
+                <div class="overflow-hidden whitespace-nowrap w-full pl-14 text-[10px] font-medium text-blue-100 flex items-center h-full relative">
+                    <div class="animate-marquee inline-block absolute w-full">🔥 UP TO 20% OFF ON AI CCTV & FIBER INSTALLATIONS | UPGRADE TO WIFI 6 TODAY 🔥</div>
+                </div>
+            </div>
+
+            <!-- Sticker 1: Services & CCTV Visual -->
+            <a href="https://datapointtechnology.com" target="_blank" class="block bg-gradient-to-br from-dpNavy to-[#0B2040] rounded-2xl p-4 text-white shadow-soft border border-dpBlue/30 relative overflow-hidden group hover:shadow-dp-glow transition-all duration-300 transform hover:-translate-y-1 shrink-0">
+                <div class="absolute -top-10 -right-10 w-24 h-24 bg-dpLightBlue rounded-full blur-xl opacity-30 group-hover:opacity-60 transition duration-500"></div>
+
+                <div class="flex items-center justify-between mb-3 relative z-10">
+                    <div>
+                        <h4 class="font-heading font-black text-lg tracking-wider leading-none"><span class="text-dpLightBlue">DATA</span>POINT</h4>
+                        <p class="text-[8px] text-blue-200 font-bold tracking-widest uppercase mt-0.5">Smart Solutions</p>
+                    </div>
+                    <!-- CCTV Visual Element -->
+                    <div class="w-9 h-9 bg-black/50 rounded-full border border-dpBlue flex items-center justify-center relative">
+                        <div class="w-1.5 h-1.5 bg-red-500 rounded-full absolute top-1 right-1 animate-pulse shadow-[0_0_5px_red]"></div>
+                        <svg class="w-5 h-5 text-dpLightBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5 mb-4 relative z-10">
+                    <div class="text-[9px] font-semibold text-gray-200 flex items-center bg-white/5 rounded p-1.5"><span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2 shadow-[0_0_3px_#4ade80]"></span>AI Security Systems</div>
+                    <div class="text-[9px] font-semibold text-gray-200 flex items-center bg-white/5 rounded p-1.5"><span class="w-1.5 h-1.5 bg-dpLightBlue rounded-full mr-2 shadow-[0_0_3px_#00A3FF]"></span>Fiber Optic Comms</div>
+                </div>
+
+                <div class="w-full text-center bg-dpBlue/20 group-hover:bg-dpBlue text-white text-[10px] font-bold py-2 rounded-lg transition border border-dpBlue/50 relative z-10">
+                    Explore Services
+                </div>
+            </a>
+
+            <!-- Sticker 2: Products -->
+            <a href="https://datapointtechnology.com/products" target="_blank" class="block bg-white rounded-2xl p-4 text-gray-800 shadow-soft border border-gray-200 relative overflow-hidden group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 shrink-0">
+                <div class="absolute -bottom-8 -left-8 w-20 h-20 bg-blue-50 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition duration-500"></div>
+
+                <div class="flex items-center mb-3 relative z-10">
+                    <div class="w-10 h-10 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center mr-3 shrink-0 group-hover:border-dpBlue transition">
+                        <svg class="w-5 h-5 text-dpBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="bg-gradient-to-r from-dpBlue to-dpLightBlue text-white text-[7px] font-bold px-1.5 py-0.5 rounded-sm w-max mb-1 uppercase tracking-widest shadow-sm">Top Rated</div>
+                        <h5 class="font-heading text-xs font-black leading-tight text-dpNavy">Smart Store</h5>
+                        <p class="text-[8px] text-gray-500 mt-0.5">REOQOO & EZVIZ Cams</p>
+                    </div>
+                </div>
+
+                <div class="w-full text-center bg-gray-50 group-hover:bg-dpNavy group-hover:text-white border border-gray-200 text-gray-700 text-[10px] font-bold py-2 rounded-lg transition relative z-10">
+                    Shop Products
+                </div>
+            </a>
+
+            <div class="text-center mt-2 opacity-60 hover:opacity-100 transition cursor-default">
+                <div class="inline-flex items-center justify-center space-x-1 mb-1">
+                    <svg class="w-3 h-3 text-dpLightBlue" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">10+ Yrs Exp | 500+ Proj</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- FOOTER: EXACT HIGH-CONTRAST BRAND CARD & AI RECEPTION     -->
+    <!-- ========================================================= -->
+    <footer class="mt-auto bg-slate-950 text-white border-t border-slate-800 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 py-12 relative z-10">
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center justify-between">
+
+            <!-- Left: Facility Info -->
+            <div class="lg:col-span-4 text-center lg:text-left space-y-2">
+              <div class="text-[#d4af37] text-xl font-black tracking-widest uppercase">
+                THE PALM VILLAGE
+              </div>
+              <p class="text-sm text-slate-300 font-medium">
+                Hyderabad's Premier Padel Club & Sports Facility
+              </p>
+              <p class="text-xs text-slate-400">
+                &copy; 2024 The Palm Builders. All rights reserved.
+              </p>
+            </div>
+
+            <!-- Center: EXACT High-Contrast White Brand Card for DATAPOINT -->
+            <div class="lg:col-span-5 flex justify-center">
+              <a href="https://datapoint.com.pk" target="_blank" class="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 w-full max-w-md transition-all duration-300 hover:shadow-blue-500/20 block cursor-pointer">
+                <div class="flex items-center space-x-4">
+
+                  <!-- Accurate Vector Reproduction Icon -->
+                  <div class="w-16 h-16 flex-shrink-0 flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-sm">
+                      <defs>
+                        <linearGradient id="dpBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#00A3FF" />
+                          <stop offset="100%" stop-color="#0066FF" />
+                        </linearGradient>
+                        <linearGradient id="dpNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#1A3B6B" />
+                          <stop offset="100%" stop-color="#0B1E3F" />
+                        </linearGradient>
+                      </defs>
+
+                      <!-- Digital Mosaic trailing pixels in bright cyan / electric blue -->
+                      <rect x="18" y="14" width="7" height="7" fill="#00A3FF" rx="1.5" />
+                      <rect x="28" y="14" width="7" height="7" fill="#0070F3" rx="1.5" />
+                      <rect x="20" y="24" width="7" height="7" fill="#0070F3" rx="1.5" />
+                      <rect x="30" y="24" width="7" height="7" fill="#00A3FF" rx="1.5" />
+                      <rect x="24" y="34" width="7" height="7" fill="#0B1E3F" rx="1.5" />
+
+                      <!-- Layered 3D Folded P Monogram with Navy & Royal Blue Gradients -->
+                      <!-- Top Outer Loop -->
+                      <path
+                        d="M44 14 H68 C80 14 86 21 86 32 C86 43 80 50 68 50 H54 V78 H44 V14 Z"
+                        fill="url(#dpBlueGrad)"
+                      />
+                      <!-- Inner Counter / Cutout -->
+                      <path
+                        d="M54 26 H66 C72 26 74 28 74 32 C74 36 72 38 66 38 H54 V26 Z"
+                        fill="#FFFFFF"
+                      />
+                      <!-- Inner Fold Layer -->
+                      <path
+                        d="M36 40 H50 V78 H36 Z"
+                        fill="url(#dpNavyGrad)"
+                      />
+                    </svg>
+                  </div>
+
+                  <!-- Brand Typography -->
+                  <div class="flex-1">
+                    <span class="text-[9px] uppercase tracking-[0.25em] font-extrabold text-slate-400 block mb-0.5">
+                      Powered By
+                    </span>
+
+                    <!-- DATA in #0B1E3F, POINT in #0070F3 -->
+                    <div class="text-2xl sm:text-3xl font-black tracking-wider leading-none flex items-center">
+                      <span class="text-[#0B1E3F] mr-[1px]">DATA</span>
+                      <span class="text-[#0070F3]">POINT</span>
+                    </div>
+
+                    <!-- TECHNOLOGIES flanked by electric blue bars -->
+                    <div class="flex items-center space-x-2 mt-1.5">
+                      <span class="h-0.5 w-6 bg-[#0070F3]"></span>
+                      <span class="text-[9px] sm:text-[10px] font-black tracking-[0.22em] text-[#0B1E3F]">
+                        TECHNOLOGIES
+                      </span>
+                      <span class="h-0.5 w-6 bg-[#0070F3]"></span>
+                    </div>
+
+                    <!-- Tagline -->
+                    <div class="text-[8px] sm:text-[8.5px] font-black tracking-[0.06em] mt-1">
+                      <span class="text-[#0B1E3F]">SMART SOLUTIONS. </span>
+                      <span class="text-[#0070F3]">INTELLIGENT FUTURE.</span>
+                    </div>
+                  </div>
+
+                </div>
+              </a>
+            </div>
+
+            <!-- Right: Dedicated AI Reception Card -->
+            <div class="lg:col-span-3 flex flex-col items-center lg:items-end space-y-2">
+              <span class="text-slate-400 tracking-wider text-[11px] uppercase font-bold">
+                Automated Court Helpline
+              </span>
+
+              <div class="bg-slate-900 border border-slate-700/80 px-4 py-3 rounded-2xl flex flex-col items-center lg:items-end space-y-1 shadow-sm">
+                <div class="flex items-center space-x-2">
+                  <div class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A3FF] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00A3FF]"></span>
+                  </div>
+                  <span class="text-xs text-blue-200 font-bold uppercase tracking-wider">
+                    Ai Reception: 03712566540
+                  </span>
+                </div>
+
+                <div class="flex items-center space-x-2 pt-1">
+                  <a
+                    href="tel:03712566540"
+                    class="text-white hover:text-[#00A3FF] font-mono font-black text-lg transition tracking-wider"
+                  >
+                    03712566540
+                  </a>
+                  <a
+                    href="https://wa.me/923712566540?text=Hello%20DATAPOINT%20Ai%20Reception%2C%20I%20have%20an%20inquiry%20regarding%20Palm%20Village%20Padel%20Club"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="p-1.5 bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-lg transition"
+                    title="WhatsApp AI Reception"
+                  >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+    </footer>
+
+    <!-- Confirmation Modal -->
+    <div x-show="showConfirmation" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-md" x-transition>
+        <div class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full overflow-hidden transform transition-all" @click.away="showConfirmation = false">
+            <div class="bg-palmGreen p-8 text-center text-white relative">
+                <button @click="showConfirmation = false" class="absolute top-4 right-4 text-white/70 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <div class="w-20 h-20 bg-palmGold text-palmGreen rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 class="font-heading text-3xl font-black mb-1">Confirmed!</h3>
+                <p class="text-palmGold text-sm font-bold tracking-widest">REF: #PV-<span x-text="bookingRef"></span></p>
+            </div>
+
+            <div class="p-8">
+                <!-- QR Code E-Pass Display -->
+                <div class="flex flex-col items-center justify-center mb-6">
+                    <div class="bg-white p-3 rounded-2xl shadow-sm border-2 border-gray-100 mb-3">
+                        <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PV-${bookingRef}`" alt="Booking QR Code" class="w-32 h-32 object-contain">
+                    </div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold text-center bg-gray-100 px-3 py-1 rounded-full">Scan at Reception</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-5 mb-6 border border-gray-100 text-sm space-y-3 text-gray-600 font-medium">
+                    <div class="flex justify-between"><span class="text-gray-400">Name</span> <span class="text-gray-800 font-bold" x-text="name"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Date</span> <span class="text-gray-800 font-bold" x-text="date"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Time</span> <span class="text-gray-800 font-bold" x-text="slot"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Package</span> <span class="text-gray-800 font-bold" x-text="type === 'resident' ? 'Resident' : 'Outsider'"></span></div>
+                    <div class="pt-4 mt-2 border-t border-gray-200 flex justify-between items-center"><span class="text-gray-800 font-bold">Total</span> <span class="text-palmGreen font-black text-xl">Rs. <span x-text="totalAmount"></span></span></div>
+                </div>
+
+                <button @click="openWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-lg py-4 rounded-xl flex justify-center items-center space-x-2 shadow-lg shadow-green-500/30 transition transform hover:-translate-y-1">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    <span>Receive on WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- ADMIN LOGIN MODAL                                         -->
+    <!-- ========================================================= -->
+    <div x-show="showAdminLoginModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-md" x-transition>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative border border-gray-100" @click.away="showAdminLoginModal = false">
+            <button @click="showAdminLoginModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="w-12 h-12 bg-blue-50 text-dpBlue rounded-xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h3 class="text-xl font-black text-center text-gray-900 mb-1">Admin Access</h3>
+            <p class="text-xs text-center text-gray-500 mb-4 font-medium">Enter password to access court controls</p>
+
+            <form @submit.prevent="handleAdminLoginSubmit()" class="space-y-4">
+                <div>
+                    <input type="password" x-model="adminPasswordInput" placeholder="Password (demo: admin123)" class="w-full p-3.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-dpBlue outline-none text-sm text-center font-mono">
+                    <p x-show="adminAuthError" x-text="adminAuthError" class="text-xs text-red-500 font-bold mt-1.5 text-center" style="display: none;"></p>
+                </div>
+                <button type="submit" class="w-full bg-dpNavy hover:bg-gray-800 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-md">
+                    Sign In to Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- CHANGE PASSWORD MODAL                                     -->
+    <!-- ========================================================= -->
+    <div x-show="showPasswordModal" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-md" x-transition>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative border border-gray-100" @click.away="showPasswordModal = false">
+            <button @click="showPasswordModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="w-12 h-12 bg-green-50 text-palmGreen rounded-xl flex items-center justify-center mx-auto mb-4 border border-green-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4v-3.586l7.172-7.172A6 6 0 1115 9z"></path></svg>
+            </div>
+            <h3 class="text-xl font-black text-center text-gray-900 mb-1">Change Password</h3>
+            <p class="text-xs text-center text-gray-500 mb-4 font-medium">Enter a new secure password for the admin panel.</p>
+
+            <form @submit.prevent="updateAdminPassword()" class="space-y-4">
+                <div>
+                    <input type="password" x-model="newPasswordInput" placeholder="New Password" required minlength="5" class="w-full p-3.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-palmGreen outline-none text-sm text-center font-mono">
+                </div>
+                <button type="submit" class="w-full bg-palmGreen hover:bg-palmGreenDark text-white font-bold py-3.5 rounded-xl text-sm transition shadow-md">
+                    Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Logic (Firebase & AlpineJS) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, serverTimestamp, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCjrCgQWdhjOVvERnBRJFVarH7UZ7gMBrA",
+            authDomain: "palm-village-project.firebaseapp.com",
+            projectId: "palm-village-project",
+            storageBucket: "palm-village-project.firebasestorage.app",
+            messagingSenderId: "795822802972",
+            appId: "1:795822802972:web:88a85865cfe04c211937d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.saveBookingToFirebase = async function(bookingData, userData) {
+            try {
+                const userRef = doc(db, "users", userData.nic);
+                await setDoc(userRef, {
+                    ...userData,
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+
+                const docRef = await addDoc(collection(db, "bookings"), {
+                    ...bookingData,
+                    userId: userData.nic,
+                    createdAt: serverTimestamp(),
+                    status: 'confirmed'
+                });
+                return true;
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                return false;
+            }
+        };
+
+        // ADMIN FUNCTION: Fetch Daily Report
+        window.fetchDailyReportFromFirebase = async function(dateStr) {
+            console.log("Fetching bookings for date:", dateStr);
+            try {
+                const q = query(collection(db, "bookings"), where("bookingDate", "==", dateStr));
+                const querySnapshot = await getDocs(q);
+                let bookings = [];
+                let totalIncome = 0;
+                querySnapshot.forEach((docSnap) => {
+                    let data = docSnap.data();
+                    data.docId = docSnap.id;
+                    bookings.push(data);
+                    totalIncome += data.financials.totalPaid;
+                });
+                console.log("Found bookings:", bookings.length);
+                return { bookings, totalIncome };
+            } catch (e) {
+                console.error("Error fetching report:", e);
+                alert("Error fetching report: " + e.message);
+                return { bookings: [], totalIncome: 0 };
+            }
+        };
+
+        // ADMIN FUNCTION: Mark as Utilized manually from web
+        window.markBookingUtilized = async function(docId) {
+            try {
+                const bookingRef = doc(db, "bookings", docId);
+                await updateDoc(bookingRef, {
+                    status: 'utilized'
+                });
+                return true;
+            } catch (e) {
+                console.error("Error updating status:", e);
+                return false;
+            }
+        };
+
+        // ADMIN FUNCTION: Verify Password
+        window.verifyAdminPassword = async function(inputPwd) {
+            try {
+                const docRef = doc(db, "admin", "settings");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    return docSnap.data().password === inputPwd;
+                } else {
+                    // Initialize with default if not present
+                    if (inputPwd === "admin123") {
+                        await setDoc(docRef, { password: "admin123" });
+                        return true;
+                    }
+                    return false;
+                }
+            } catch (e) {
+                console.error("Auth error:", e);
+                return inputPwd === "admin123";
+            }
+        };
+
+        // ADMIN FUNCTION: Change Password
+        window.changeAdminPassword = async function(newPwd) {
+            try {
+                const docRef = doc(db, "admin", "settings");
+                await setDoc(docRef, { password: newPwd }, { merge: true });
+                return true;
+            } catch(e) {
+                console.error("Update error:", e);
+                return false;
+            }
+        };
+    </script>
+
+    <script>
+        function padelBookingApp() {
+            return {
+                currentView: 'landing',
+                mobileMenuOpen: false,
+                type: 'resident',
+                verification: '',
+                nic: '',
+                date: '',
+                slot: '',
+                name: '',
+                phone: '+92 ',
+                email: '',
+                players: '2',
+                rackets: 0,
+                balls: 0,
+                showConfirmation: false,
+                bookingRef: '',
+
+                rates: {
+                    resident: 1200,
+                    outsider: 2000
+                },
+
+                // Initialization
+                initApp() {
+                    this.date = this.minDate();
+                },
+
+                // Navigation Logic
+                goHome() {
+                    this.currentView = 'landing';
+                    this.mobileMenuOpen = false;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                scrollToAbout() {
+                    this.currentView = 'landing';
+                    this.mobileMenuOpen = false;
+                    setTimeout(() => {
+                        const aboutEl = document.getElementById('about-us-section');
+                        if(aboutEl) {
+                            const y = aboutEl.getBoundingClientRect().top + window.scrollY - 100;
+                            window.scrollTo({top: y, behavior: 'smooth'});
+                        }
+                    }, 100);
+                },
+
+                get todayDateFormatted() {
+                    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+                    return new Date().toLocaleDateString('en-US', options);
+                },
+
+                // Time Slots logic
+                get _allTimeSlots() {
+                    return [
+                        '06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM',
+                        '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM', '09:00 PM', '10:00 PM'
+                    ];
+                },
+
+                get todaySlots() {
+                    let seed = new Date().getDate();
+                    return this._allTimeSlots.map((t, index) => {
+                        let isBooked = (index + seed) % 4 === 0;
+                        return { time: t, booked: isBooked };
+                    });
+                },
+
+                get filteredSlots() {
+                    if (!this.date) return [];
+                    let seed = this.date.charCodeAt(this.date.length - 1);
+                    return this._allTimeSlots.map((t, index) => {
+                        let isBooked = (index + seed) % 4 === 0;
+                        return { time: t, booked: isBooked };
+                    });
+                },
+
+                quickBook(timeSlot) {
+                    this.date = this.minDate();
+                    this.slot = timeSlot;
+                    this.currentView = 'booking';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                setPackage(pkgType) {
+                    this.type = pkgType;
+                    this.date = this.minDate();
+                    this.slot = '';
+                },
+
+                minDate() {
+                    return new Date().toISOString().split('T')[0];
+                },
+
+                maxDate() {
+                    let d = new Date();
+                    let daysToAdd = this.type === 'resident' ? 7 : 3;
+                    d.setDate(d.getDate() + daysToAdd);
+                    return d.toISOString().split('T')[0];
+                },
+
+                get courtFee() {
+                    return this.rates[this.type];
+                },
+
+                get totalAmount() {
+                    return this.courtFee + (this.rackets * 200) + (this.balls * 500);
+                },
+
+                confirmBooking() {
+                    if (this.type === 'resident' && !this.verification.trim()) {
+                        alert("Please provide your Villa/Apartment Number for Resident verification.");
+                        return;
+                    }
+                    if (!this.date) {
+                        alert("Please select a date.");
+                        return;
+                    }
+                    if (!this.slot) {
+                        alert("Please select an available time slot.");
+                        return;
+                    }
+                    if (!this.nic.trim()) {
+                        alert("Please provide your NIC Number.");
+                        return;
+                    }
+                    if (!this.name.trim() || this.phone.trim().length < 8) {
+                        alert("Please provide a valid Name and WhatsApp number.");
+                        return;
+                    }
+
+                    this.bookingRef = Math.floor(10000 + Math.random() * 90000);
+                    this.showConfirmation = true;
+
+                    const userPayload = {
+                        name: this.name,
+                        nic: this.nic,
+                        whatsappNumber: this.phone,
+                        email: this.email || '',
+                        villaNumber: this.type === 'resident' ? this.verification : 'N/A',
+                        type: this.type
+                    };
+
+                    const bookingPayload = {
+                        bookingReference: `PV-${this.bookingRef}`,
+                        packageType: this.type,
+                        bookingDate: this.date,
+                        timeSlot: this.slot,
+                        numberOfPlayers: this.players,
+                        addons: {
+                            rackets: this.rackets,
+                            balls: this.balls
+                        },
+                        financials: {
+                            courtFee: this.courtFee,
+                            addonsFee: (this.rackets * 200) + (this.balls * 500),
+                            totalPaid: this.totalAmount
+                        }
+                    };
+
+                    if (window.saveBookingToFirebase) {
+                        window.saveBookingToFirebase(bookingPayload, userPayload);
+                    }
+                },
+
+                openWhatsApp() {
+                    const typeDisplay = this.type === 'resident' ? 'Palm Resident' : 'Guest';
+
+                    // Generate a dynamic QR Code URL using a free API
+                    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PV-${this.bookingRef}`;
+
+                    const msg = `🎾 *PALM VILLAGE PADEL CLUB - BOOKING CONFIRMED*
+
+Assalam-o-Alaikum / Hello ${this.name},
+Your padel court reservation has been confirmed!
+
+📅 *Date:* ${this.date}
+⏰ *Slot:* ${this.slot} (1 Hour)
+🏷️ *Package:* ${typeDisplay}
+💰 *Total Amount:* Rs. ${this.totalAmount}
+📍 *Venue:* Court 1, Palm Village Sports Facility
+🔖 *Booking Reference:* #PV-${this.bookingRef}
+
+📱 *YOUR E-PASS (QR CODE):*
+Click the link below to view your QR code. Please present this to the admin upon arrival to utilize your slot.
+${qrCodeUrl}
+
+*Walk-in Policy:* If the QR code is not scanned within 15 minutes of the slot time, it may be given to walk-in customers.
+For queries, message this number.`;
+
+                    const encodedMsg = encodeURIComponent(msg);
+                    const cleanPhone = this.phone.replace(/[^\d+]/g, '');
+                    window.open(`https://wa.me/${cleanPhone}?text=${encodedMsg}`, '_blank');
+                    this.showConfirmation = false;
+                    this.currentView = 'landing';
+                },
+
+                // ADMIN DASHBOARD LOGIC
+                adminAuth: false,
+                adminDate: new Date().toISOString().split('T')[0],
+                dailyBookings: [],
+                dailyIncome: 0,
+                showAdminLoginModal: false,
+                adminPasswordInput: '',
+                adminAuthError: '',
+
+                // Change Password Logic
+                showPasswordModal: false,
+                newPasswordInput: '',
+
+                openAdmin() {
+                    if (this.adminAuth) {
+                        this.currentView = 'admin';
+                        this.loadDailyReport();
+                    } else {
+                        this.adminPasswordInput = '';
+                        this.adminAuthError = '';
+                        this.showAdminLoginModal = true;
+                    }
+                },
+
+                async handleAdminLoginSubmit() {
+                    let pwd = this.adminPasswordInput.trim();
+                    let isValid = false;
+
+                    if (window.verifyAdminPassword) {
+                        isValid = await window.verifyAdminPassword(pwd);
+                    } else {
+                        isValid = (pwd.toLowerCase() === "admin123");
+                    }
+
+                    if(isValid) {
+                        this.adminAuth = true;
+                        this.showAdminLoginModal = false;
+                        this.currentView = 'admin';
+                        this.loadDailyReport();
+                    } else {
+                        this.adminAuthError = "Incorrect Password. Please try again.";
+                    }
+                },
+
+                async updateAdminPassword() {
+                    if(!this.newPasswordInput.trim()) {
+                        alert("Password cannot be empty.");
+                        return;
+                    }
+                    if (window.changeAdminPassword) {
+                        let success = await window.changeAdminPassword(this.newPasswordInput.trim());
+                        if (success) {
+                            alert("Admin Password has been successfully updated!");
+                            this.showPasswordModal = false;
+                            this.newPasswordInput = '';
+                        } else {
+                            alert("Failed to update password. Please check your connection.");
+                        }
+                    }
+                },
+
+                async loadDailyReport() {
+                    if (window.fetchDailyReportFromFirebase) {
+                        const report = await window.fetchDailyReportFromFirebase(this.adminDate);
+                        this.dailyBookings = report.bookings;
+                        this.dailyIncome = report.totalIncome;
+                    }
+                },
+
+                async markUtilized(docId) {
+                    if(confirm("Mark this booking as utilized?")) {
+                        const success = await window.markBookingUtilized(docId);
+                        if(success) {
+                            alert("Booking utilized!");
+                            this.loadDailyReport(); // Refresh list
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
