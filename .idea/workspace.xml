@@ -4,7 +4,27 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="963975b7-8177-4356-b1a4-4e88fdf15e24" name="Changes" comment="New Upload" />
+    <list default="true" id="963975b7-8177-4356-b1a4-4e88fdf15e24" name="Changes" comment="New Upload">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Palm_Village_Web_App.zip" beforeDir="false" afterPath="$PROJECT_DIR$/Palm_Village_Web_App.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/.htaccess" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/404.html" beforeDir="false" afterPath="$PROJECT_DIR$/out/404.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/__next.__PAGE__.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/__next.__PAGE__.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/__next._full.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/__next._full.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/__next._tree.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/__next._tree.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_next/static/0U9geTu-zS3qqV2qZP0uL/_buildManifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_next/static/0U9geTu-zS3qqV2qZP0uL/_clientMiddlewareManifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_next/static/0U9geTu-zS3qqV2qZP0uL/_ssgManifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_not-found.html" beforeDir="false" afterPath="$PROJECT_DIR$/out/_not-found.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_not-found.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/_not-found.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_not-found/__next._full.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/_not-found/__next._full.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_not-found/__next._not-found/__PAGE__.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/_not-found/__next._not-found/__PAGE__.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/_not-found/__next._tree.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/_not-found/__next._tree.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/out/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/index.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/index.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/palm_logo.png" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

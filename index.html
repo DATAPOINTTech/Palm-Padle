@@ -196,12 +196,12 @@
                         <template x-for="s in todaySlots" :key="s.time">
                             <button @click="quickBook(s.time)"
                                     :disabled="s.booked"
-                                    :class="s.booked ? 'bg-gray-50 border-gray-100 text-gray-400 opacity-70 cursor-not-allowed' : 'bg-white border-palmGreen/30 text-palmGreen hover:bg-palmGreen hover:text-white hover:shadow-md transform hover:-translate-y-1'"
+                                    :class="s.status === 'active' ? 'bg-green-50 border-green-200 text-green-700 cursor-not-allowed shadow-sm' : s.booked ? 'bg-gray-50 border-gray-100 text-gray-400 opacity-70 cursor-not-allowed' : 'bg-white border-palmGreen/30 text-palmGreen hover:bg-palmGreen hover:text-white hover:shadow-md transform hover:-translate-y-1'"
                                     class="py-4 rounded-2xl border-2 font-bold transition-all duration-200 flex flex-col items-center justify-center space-y-1">
                                 <span class="text-lg" x-text="s.time"></span>
                                 <span class="text-[10px] uppercase tracking-wider font-bold"
-                                      :class="s.booked ? 'text-gray-400' : 'text-palmGold'"
-                                      x-text="s.booked ? 'Booked' : 'Available'"></span>
+                                      :class="s.status === 'active' ? 'text-green-600' : s.booked ? 'text-gray-400 line-through' : 'text-palmGold'"
+                                      x-text="s.status === 'active' ? 'Live Match' : s.booked ? 'Booked' : 'Available'"></span>
                             </button>
                         </template>
                     </div>
@@ -321,9 +321,12 @@
                             <template x-for="s in filteredSlots" :key="s.time">
                                 <button @click="if(!s.booked) slot = s.time"
                                         :disabled="s.booked"
-                                        :class="s.booked ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60' : (slot === s.time ? 'bg-palmGreen text-white border-palmGreen shadow-md transform scale-105' : 'bg-white text-gray-700 border-gray-300 hover:border-palmGreen hover:text-palmGreen hover:shadow-sm')"
-                                        class="py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 border">
+                                        :class="s.status === 'active' ? 'bg-green-50 text-green-700 border-green-200 cursor-not-allowed opacity-80' : s.booked ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60' : (slot === s.time ? 'bg-palmGreen text-white border-palmGreen shadow-md transform scale-105' : 'bg-white text-gray-700 border-gray-300 hover:border-palmGreen hover:text-palmGreen hover:shadow-sm')"
+                                        class="py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 border flex flex-col items-center">
                                     <span x-text="s.time"></span>
+                                    <span class="text-[9px] uppercase tracking-wider font-black mt-0.5"
+                                          :class="s.status === 'active' ? 'text-green-600' : s.booked ? 'text-gray-400 line-through' : slot === s.time ? 'text-white' : 'text-palmGold'"
+                                          x-text="s.status === 'active' ? 'Live' : s.booked ? 'Booked' : ''"></span>
                                 </button>
                             </template>
                         </div>
@@ -956,6 +959,9 @@
                 // Initialization
                 initApp() {
                     this.date = this.minDate();
+                    this.fetchPublicSlots();
+                    this.$watch('date', () => this.fetchPublicSlots());
+                    this.$watch('currentView', () => this.fetchPublicSlots());
                 },
 
                 // Navigation Logic
@@ -989,20 +995,34 @@
                     ];
                 },
 
+                todayBookings: [],
+                filteredBookings: [],
+
+                async fetchPublicSlots() {
+                    if (window.fetchDailyReportFromFirebase) {
+                        const todayIso = new Date().toISOString().split('T')[0];
+                        const report = await window.fetchDailyReportFromFirebase(todayIso);
+                        this.todayBookings = report.bookings || [];
+
+                        if (this.date) {
+                            const dateReport = await window.fetchDailyReportFromFirebase(this.date);
+                            this.filteredBookings = dateReport.bookings || [];
+                        }
+                    }
+                },
+
                 get todaySlots() {
-                    let seed = new Date().getDate();
-                    return this._allTimeSlots.map((t, index) => {
-                        let isBooked = (index + seed) % 4 === 0;
-                        return { time: t, booked: isBooked };
+                    return this._allTimeSlots.map((t) => {
+                        let booking = this.todayBookings.find(b => b.timeSlot === t && b.status !== 'utilized');
+                        return { time: t, booked: !!booking, status: booking ? booking.status : 'available' };
                     });
                 },
 
                 get filteredSlots() {
                     if (!this.date) return [];
-                    let seed = this.date.charCodeAt(this.date.length - 1);
-                    return this._allTimeSlots.map((t, index) => {
-                        let isBooked = (index + seed) % 4 === 0;
-                        return { time: t, booked: isBooked };
+                    return this._allTimeSlots.map((t) => {
+                        let booking = this.filteredBookings.find(b => b.timeSlot === t && b.status !== 'utilized');
+                        return { time: t, booked: !!booking, status: booking ? booking.status : 'available' };
                     });
                 },
 
