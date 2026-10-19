@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Serve .html if the requested file without .html exists
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ .html [L]
+
+  # Redirect 404 to index.html to allow Next.js routing (or a custom 404)
+  ErrorDocument 404 /404.html
+</IfModule>
